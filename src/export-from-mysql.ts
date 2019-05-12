@@ -1,19 +1,9 @@
-import * as fs from 'fs';
 import * as mysql from 'mysql';
-import * as path from 'path';
 
+import { config } from './config';
 import { writeResultToFile } from './helper';
 
-// tslint:disable-next-line:no-var-requires no-require-imports
-const mysqlConfig = require('../mysql-config.json');
-
-const connection = mysql.createConnection(mysqlConfig);
-
-const pathOfData = `${path.dirname(__dirname) + path.sep}data`;
-const pathOfDataJson = `${pathOfData + path.sep}data.json`;
-if (!fs.existsSync(pathOfData)) {
-    fs.mkdirSync(pathOfData);
-}
+const connection = mysql.createConnection(config.mysql);
 
 connection.connect();
 
@@ -30,7 +20,7 @@ connection.query(
             dataFirestore[collectionName][docID] = element;
         });
 
-        writeResultToFile(pathOfDataJson, dataFirestore);
+        writeResultToFile(config.pathOfDataJson, dataFirestore);
 });
 
 connection.end();

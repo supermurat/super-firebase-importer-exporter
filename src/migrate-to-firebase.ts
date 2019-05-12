@@ -1,31 +1,12 @@
-import { Storage } from '@google-cloud/storage';
-import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as mime from 'mime-types';
 import * as path from 'path';
 
-// tslint:disable-next-line:no-var-requires no-require-imports
-const serviceAccount = require('../supermurat-com-service-key.json');
+import { config } from './config';
+import { admin, bucket, storage } from './initialize-app';
 
 // tslint:disable-next-line:no-var-requires no-require-imports
-let data = require('../data/data.json');
-
-const storage = new Storage();
-
-// CONFIG
-// keep "remoteFilePath" undefined in order to use relative path
-// think about to give read permission for your users or public : "../firebase/storage.rules"
-const remoteFilePath = '/publicFiles/';
-// END OF CONFIG
-
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
-});
-const bucketName = `${serviceAccount.project_id}.appspot.com`;
-const bucket = admin.storage().bucket(bucketName);
-const pathOfData = `${path.dirname(__dirname) + path.sep}data`;
-const pathOfFiles = `${pathOfData + path.sep}files`;
+let data = require(config.pathOfDataJson);
 
 // File
 const getFiles = (dir: string, files: Array<string>): Array<string> => {
@@ -46,45 +27,40 @@ const getFiles = (dir: string, files: Array<string>): Array<string> => {
 const uploadImageToStorage = async (fileContent: any, fileName: string): Promise<any> =>
     new Promise<any>((resolve, reject): void => {
         const fileUpload = bucket.file(fileName);
+        // https://cloud.google.com/nodejs/docs/reference/storage/1.3.x/File#createWriteStream
         const blobStream = fileUpload.createWriteStream({
             metadata: {
-                contentType: mime.lookup(fileName)
-            }
+                // https://cloud.google.com/storage/docs/json_api/v1/objects/insert#request_properties_JSON
+                contentType: mime.lookup(fileName),
+                cacheControl: `public, max-age=${60 * 60 * 24 * 365}`
+            },
+            public: config.upload.makePublic
         });
         blobStream.on('error', (error) => {
             reject(error);
         });
         blobStream.on('finish', () => {
-            fileUpload.acl.add({
-                entity: 'allUsers',
-                role: storage.acl.READER_ROLE
-            }).then((info) => {
-                // console.log(info); // this "info" contains lots of cool info about file
-                resolve(`https://storage.googleapis.com/${bucket.name}${fileName}`);
-            }).catch((err) => {
-                reject(err);
-            });
+            resolve(`https://storage.googleapis.com/${bucket.name}${fileName}`);
         });
         blobStream.end(fileContent);
     });
 
 const uploadFileAndGetURL = async (pathOfFile: string, filePath: string): Promise<any> =>
     new Promise<any>((resolve, reject): void => {
-        const relativePath = filePath.replace(pathOfFile, '').replace(/\\/g, '/');
-        const destinationPath = remoteFilePath ? remoteFilePath + path.basename(filePath) : relativePath;
+        const destinationPath = filePath.replace(pathOfFile, '').replace(/\\/g, '/');
 
         bucket.file(destinationPath).exists()
             .then((info) => {
                 if (info[0]) {
                     const url = `https://storage.googleapis.com/${bucket.name}${destinationPath}`;
                     console.log('Already Uploaded File : ', url);
-                    resolve({relativePath, url});
+                    resolve({destinationPath, url});
                 } else {
                     const fileContent = fs.readFileSync(filePath);
                     uploadImageToStorage(fileContent, destinationPath)
                         .then((url) => {
                             console.log('Newly Uploaded File : ', url);
-                            resolve({relativePath, url});
+                            resolve({destinationPath, url});
                         })
                         .catch((error) => {
                             reject(error);
@@ -99,28 +75,32 @@ const uploadFileAndGetURL = async (pathOfFile: string, filePath: string): Promis
 const uploadFilesAndFixFilePaths = async (): Promise<any> =>
     new Promise<any>((resolve, reject): void => {
         let dataString = JSON.stringify(data);
-        if (!fs.existsSync(pathOfFiles)) {
+        if (!fs.existsSync(config.pathOfFiles)) {
+            console.log('There is no file to upload!');
             resolve();
         } // There is no directory (pathOfFiles) to upload, so let's skip to import only data.json
-        const files = getFiles(pathOfFiles, undefined);
+        const files = getFiles(config.pathOfFiles, undefined);
         if (files.length > 0) {
             const promises = [];
             files.forEach((filePath) => {
-                promises.push(uploadFileAndGetURL(pathOfFiles, filePath));
+                promises.push(uploadFileAndGetURL(config.pathOfFiles, filePath));
             });
             Promise.all(promises)
                 .then((results) => {
+                    console.log(`Files upload successfully: ${files.length} files`);
                     results.forEach((pru) => {
                         dataString = dataString.replace(new RegExp(pru.relativePath, 'gi'), pru.url);
                         // console.log(pru.relativePath, ">>", pru.url);
                     });
                     data = JSON.parse(dataString);
+                    console.log(`Fixed uploaded file paths in data.`);
                     resolve();
                 })
                 .catch((e) => {
                     console.error(e);
                 });
         } else {
+            console.log('There is no file to upload!');
             resolve();
         }
     });

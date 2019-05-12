@@ -11,6 +11,7 @@
     "migrate-to-firebase": "npm run build && node ./lib/migrate-to-firebase.js",
     "download-data-from-firestore": "npm run build && node ./lib/download-data-from-firestore.js",
     "download-files-from-fire-storage": "npm run build && node ./lib/download-files-from-fire-storage.js",
+    "clean-data": "npm run build && node ./lib/clean-data.js",
     "imagemin": "npm run build && node ./lib/imagemin.js",
     "commit": "commit-wizard"
   },

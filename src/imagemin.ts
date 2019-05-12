@@ -3,14 +3,11 @@ import * as imagemin from 'imagemin';
 import * as imageminWebp from 'imagemin-webp';
 import * as path from 'path';
 
-import { checkDirectory, getDirectoriesRecursive } from './helper';
-
-const pathOfData = `${path.dirname(__dirname) + path.sep}data`;
-const pathOfSourceImages = `${pathOfData + path.sep}files`;
-checkDirectory(pathOfSourceImages);
+import { config } from './config';
+import { getDirectoriesRecursive } from './helper';
 
 export const convertToWebp = async (): Promise<any> => {
-    const imageDirs = getDirectoriesRecursive(pathOfSourceImages);
+    const imageDirs = getDirectoriesRecursive(config.pathOfFiles);
     for (let i = 0; i < imageDirs.length; i++) {
         const dirPath = imageDirs[i];
         await imagemin([`${dirPath + path.sep}*.{jpg,jpeg,png,gif,JPG,JPEG,PNG,GIF}`], dirPath + path.sep, {
@@ -23,7 +20,7 @@ export const convertToWebp = async (): Promise<any> => {
         console.log(`${
             (((+i + 1) / imageDirs.length) * 100).toFixed(0)
         }% - ${
-            dirPath.replace(path.dirname(pathOfSourceImages), '')
+            dirPath.replace(path.dirname(config.pathOfFiles), '')
         }`);
     }
 };

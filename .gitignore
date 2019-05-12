@@ -60,9 +60,9 @@ typings/
 # next.js build output
 .next
 
-/supermurat-com-service-key.json
+/*-service-account.json
 /package-lock.json
-/mysql-config.json
 /data/*
 !/data/data-sample.json
 /lib
+/temp

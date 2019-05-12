@@ -5,20 +5,14 @@ import * as latinize from 'latinize';
 import * as mysql from 'mysql';
 import * as path from 'path';
 
+import { config } from './config';
 import { checkDirectory, writeResultToFile } from './helper';
 
-// tslint:disable-next-line:no-var-requires no-require-imports
-const mysqlConfig = require('../mysql-config.json');
-
-const connection = mysql.createConnection(mysqlConfig);
+const connection = mysql.createConnection(config.mysql);
 
 connection.connect();
 
 const baseURLOfWebSite = 'http://supermurat.com';
-const pathOfData = `${path.dirname(__dirname) + path.sep}data`;
-const pathOfDataJson = `${pathOfData + path.sep}data.json`;
-const pathOfFiles = `${pathOfData + path.sep}files`;
-checkDirectory(pathOfFiles);
 
 // data you want to import into Firestore
 const dataFirestore = {};
@@ -267,9 +261,9 @@ const downloadFiles = (htmlContent: string): void => {
         fileMatchList.forEach((fileMatch) => {
             const filePath = fileMatch.replace(/<img src=/gi, '').replace(/[\\]?"/gi, '')
                 .replace(/\//gi, path.sep).replace(/\\/gi, path.sep);
-            checkDirectory(path.dirname(pathOfFiles + filePath));
-            if (!fs.existsSync(pathOfFiles + filePath)) {
-                const file = fs.createWriteStream(pathOfFiles + filePath);
+            checkDirectory(path.dirname(config.pathOfFiles + filePath));
+            if (!fs.existsSync(config.pathOfFiles + filePath)) {
+                const file = fs.createWriteStream(config.pathOfFiles + filePath);
                 // TODO: if it starts with url, you can replace it for local file
                 http.get(baseURLOfWebSite + filePath, (response) => {
                     response.pipe(file);
@@ -490,6 +484,6 @@ ORDER BY n.created ASC`,
 getTaxonomy();
 
 const saveToFile = (): void => {
-    writeResultToFile(pathOfDataJson, dataFirestore);
+    writeResultToFile(config.pathOfDataJson, dataFirestore);
     connection.end();
 };

@@ -17,15 +17,15 @@ npm run install
 ### Create Service Account
 Service Account Name: data-transfer  
 User Role: Editor  
-[`https://console.cloud.google.com/iam-admin/serviceaccounts?authuser=0&project=supermurat-com`](https://console.cloud.google.com/iam-admin/serviceaccounts?authuser=0&project=supermurat-com)
+[`https://console.cloud.google.com/iam-admin/serviceaccounts?authuser=0&project=firebase-project-id`](https://console.cloud.google.com/iam-admin/serviceaccounts?authuser=0&project=firebase-project-id)
 ### Create a new private key
 Key Type: JSON  
 **DO NOT SHARE your private key!**
 
 ### Download private key file and copy to current directory
-File Name: supermurat-com-service-key.json  
+File Name: firebase-project-id-service-key.json  
 Relative Path: 
-(project root)/supermurat-com-service-key.json  
+(project root)/firebase-project-id-service-key.json  
 **DO NOT COMMIT your key file to GIT!**
 
 ### Create Your Own Data
@@ -36,18 +36,16 @@ Data types : [`https://firebase.google.com/docs/firestore/manage-data/data-types
 JSON Mapping : 
 [`https://developers.google.com/protocol-buffers/docs/proto3#json`](https://developers.google.com/protocol-buffers/docs/proto3#json)
 
+## Setup
+### Edit Configuration file
+Edit "src/config.json" file and save 
+
 ## Run
 **DO NOT RUN unless you are very sure about "data.json"!**  
 **!!! Matched collections/documents/fields will be OVERWRITTEN !!!**
 ```sh
 npm run migrate-to-firebase
 ```
-
-## Setup of MySQL
-### Edit MySQL Configuration file
-Make a copy of "mysql-config-sample.json" file and 
-rename it as "mysql-config.json"  
-Edit "mysql-config.json" file and save 
 
 ### Edit export-from-mysql.ts file 
 Edit "export-from-mysql.ts" file and save  

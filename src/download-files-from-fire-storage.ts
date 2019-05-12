@@ -1,23 +1,10 @@
 import * as colors from 'colors';
-import * as admin from 'firebase-admin';
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { config } from './config';
 import { checkDirectory } from './helper';
-
-// tslint:disable-next-line:no-var-requires no-require-imports
-const serviceAccount = require('../supermurat-com-service-key.json');
-
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
-});
-const bucketName = `${serviceAccount.project_id}.appspot.com`;
-const bucket = admin.storage().bucket(bucketName);
-const pathOfData = `${path.dirname(__dirname) + path.sep}data`;
-const pathOfFiles = `${pathOfData + path.sep}files`;
-
-checkDirectory(pathOfFiles);
+import { bucket } from './initialize-app';
 
 const downloadFromStorage = async (): Promise<any> => {
     const allFiles = await bucket.getFiles({
@@ -25,7 +12,7 @@ const downloadFromStorage = async (): Promise<any> => {
     });
     const files = allFiles[0];
     for (const file of files) {
-        const filePath = pathOfFiles + path.sep + file.name.replace(/\//gi, path.sep);
+        const filePath = config.pathOfFiles + path.sep + file.name.replace(/\//gi, path.sep);
         checkDirectory(path.dirname(filePath));
         if (file.name.endsWith('/')) {
             continue;

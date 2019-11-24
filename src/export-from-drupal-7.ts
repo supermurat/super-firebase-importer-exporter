@@ -143,9 +143,9 @@ const getSummary = (content: string, currentLength: number): string => {
         }
 
         return tempSummary;
-    } else {
-        return content;
     }
+
+    return content;
 };
 
 const generateCommonFields = (newData: any): void => {

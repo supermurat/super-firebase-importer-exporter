@@ -61,7 +61,6 @@ typings/
 .next
 
 /*-service-account.json
-/package-lock.json
 /data/*
 !/data/data-sample.json
 /lib

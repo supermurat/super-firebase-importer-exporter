@@ -40,19 +40,24 @@ const uploadImageToStorage = async (fileContent: any, fileName: string): Promise
             reject(error);
         });
         blobStream.on('finish', () => {
-            resolve(`https://storage.googleapis.com/${bucket.name}${fileName}`);
+            resolve(`https://storage.googleapis.com/${bucket.name}/${fileName}`);
         });
         blobStream.end(fileContent);
     });
 
 const uploadFileAndGetURL = async (pathOfFile: string, filePath: string): Promise<any> =>
     new Promise<any>((resolve, reject): void => {
-        const destinationPath = filePath.replace(pathOfFile, '').replace(/\\/g, '/');
+        let destinationPath = filePath
+            .replace(pathOfFile, '')
+            .replace(/\\/g, '/');
+        if (destinationPath.startsWith('/')) {
+            destinationPath = destinationPath.slice(1);
+        }
 
         bucket.file(destinationPath).exists()
             .then((info) => {
                 if (info[0]) {
-                    const url = `https://storage.googleapis.com/${bucket.name}${destinationPath}`;
+                    const url = `https://storage.googleapis.com/${bucket.name}/${destinationPath}`;
                     console.log('Already Uploaded File : ', url);
                     resolve({destinationPath, url});
                 } else {
@@ -89,8 +94,8 @@ const uploadFilesAndFixFilePaths = async (): Promise<any> =>
                 .then((results) => {
                     console.log(`Files upload successfully: ${files.length} files`);
                     results.forEach((pru) => {
-                        dataString = dataString.replace(new RegExp(pru.relativePath, 'gi'), pru.url);
-                        // console.log(pru.relativePath, ">>", pru.url);
+                        dataString = dataString.replace(new RegExp(`/${pru.destinationPath}`, 'gi'), pru.url);
+                        // console.log(pru.destinationPath, '>>', pru.url);
                     });
                     data = JSON.parse(dataString);
                     console.log(`Fixed uploaded file paths in data.`);

@@ -12,8 +12,9 @@ export const config = {
   */
   // tslint:disable-next-line:no-var-requires no-require-imports
   serviceAccount: require('../firebase-project-id-service-account.json'),
+  /* keep empty to set it automatically */
+  bucketName: undefined,
   /* usually it is 'firebase-project-id.appspot.com' */
-  bucketName: 'firebase-project-id.appspot.com',
   pathOfData: `${path.dirname(__dirname) + path.sep}data`,
   pathOfDataJson: `${path.dirname(__dirname) + path.sep}data${path.sep}data.json`,
   pathOfFiles: `${path.dirname(__dirname) + path.sep}data${path.sep}files`,
@@ -31,6 +32,10 @@ export const config = {
     /* make uploaded files public */
     makePublic: true
   },
+  migrate: {
+    fixMediaPaths: true,
+    oldMediaPathPrefix: 'https://storage.googleapis.com/super-murat-beta.appspot.com'
+  },
   /* If you want to use export from mysql/drupal, you need to configure mysql, otherwise keep it as it is */
   mysql: {
     host: 'localhost',
@@ -39,5 +44,9 @@ export const config = {
     database: 'db_name'
   }
 };
+
+if (config.bucketName === undefined) {
+  config.bucketName = `${config.serviceAccount.project_id}.appspot.com`;
+}
 
 checkDirectory(config.pathOfData);

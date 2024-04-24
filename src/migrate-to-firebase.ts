@@ -93,12 +93,14 @@ const uploadFilesAndFixFilePaths = async (): Promise<any> =>
             Promise.all(promises)
                 .then((results) => {
                     console.log(`Files upload successfully: ${files.length} files`);
-                    results.forEach((pru) => {
-                        dataString = dataString.replace(new RegExp(`/${pru.destinationPath}`, 'gi'), pru.url);
-                        // console.log(pru.destinationPath, '>>', pru.url);
-                    });
-                    data = JSON.parse(dataString);
-                    console.log(`Fixed uploaded file paths in data.`);
+                    if (config.migrate.fixMediaPaths) {
+                        results.forEach((pru) => {
+                            dataString = dataString.replace(new RegExp(`${config.migrate.oldMediaPathPrefix}/${pru.destinationPath}`, 'gi'), pru.url);
+                            // console.log(pru.destinationPath, '>>', pru.url);
+                        });
+                        data = JSON.parse(dataString);
+                        console.log(`Fixed uploaded file paths in data.`);
+                    }
                     resolve();
                 })
                 .catch((e) => {

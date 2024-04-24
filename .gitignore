@@ -60,7 +60,7 @@ typings/
 # next.js build output
 .next
 
-/*-service-account.json
+/sa/
 /data/*
 !/data/data-sample.json
 /lib

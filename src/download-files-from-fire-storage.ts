@@ -13,6 +13,9 @@ const downloadFromStorage = async (): Promise<any> => {
     const files = allFiles[0];
     for (const file of files) {
         const filePath = config.pathOfFiles + path.sep + file.name.replace(/\//gi, path.sep);
+        if (config.download.storageIgnoreList.length > 0 && config.download.storageIgnoreList.indexOf(file.name.split(/\//gi)[0]) > -1) {
+            continue;
+        }
         checkDirectory(path.dirname(filePath));
         if (file.name.endsWith('/')) {
             continue;

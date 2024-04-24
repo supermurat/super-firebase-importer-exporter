@@ -20,8 +20,12 @@ export const config = {
   download: {
     /* keep empty to download all of them */
     collectionList: [],
+    /* keep empty to download all of them */
+    collectionIgnoreList: ['firstResponses'],
     /* keep empty to check for sub collections on all of collections */
-    collectionListToCheckForSubCollections: []
+    collectionListToCheckForSubCollections: ['pages_en-US', 'pages_tr-TR', 'taxonomy_en-US', 'taxonomy_tr-TR'],
+    /* keep empty to download all of them */
+    storageIgnoreList: ['backups']
   },
   upload: {
     /* make uploaded files public */

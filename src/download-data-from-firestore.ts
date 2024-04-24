@@ -10,6 +10,9 @@ const downloadFromFirestore = async (): Promise<any> => {
             config.download.collectionList.indexOf(mainCollection.id) === -1) {
             continue;
         }
+        if (config.download.collectionIgnoreList.indexOf(mainCollection.id) > -1) {
+            continue;
+        }
         const pageSize = 1000;
         let currentPage = 0;
         let mainDocsSnapshot;
